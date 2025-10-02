@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", // Modern JS output
+    "module": "CommonJS", // Node uses CommonJS modules
+    "lib": ["ES2020"], // Enable modern JS features
+    "rootDir": "./src", // Source code folder
+    "outDir": "./dist", // Compiled JS files output
+    "strict": true, // Enable all strict type checks
+    "moduleResolution": "node", // For resolving modules like `express`
+    "esModuleInterop": true, // Allow default imports from CommonJS modules
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true, // Faster builds (you can set to false if you want more strict checks)
+    "resolveJsonModule": true, // Allows importing JSON
+    "declaration": true // Generates .d.ts files (optional)
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
