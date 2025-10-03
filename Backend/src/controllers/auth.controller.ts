@@ -35,3 +35,28 @@ export const register = async (req: Request, res: Response) => {
       .json({ error: error.message });
   }
 };
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } }); //fields should be a object
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({ msg: "User not Found" });
+    }
+    const isValid = await comparePassword(password, user.password);
+    if (!isValid) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ msg: "Incorrect Password" });
+    }
+    const token = signToken(user.id);
+    return res.status(StatusCodes.OK).json({
+      token,
+      user: { id: user.id, name: user.name, email: user.email },
+    });
+  } catch (error: any) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: error.message });
+  }
+};
