@@ -25,7 +25,7 @@ export const register = async (req: Request, res: Response) => {
         password: hashed,
       },
     });
-    const token = signToken(user.id);
+    const token = signToken(user.id, user.username, user.email);
     res
       .status(StatusCodes.CREATED)
       .json({ token, id: user.name, name: user.name, email: user.email });
@@ -49,7 +49,7 @@ export const login = async (req: Request, res: Response) => {
         .status(StatusCodes.BAD_REQUEST)
         .json({ msg: "Incorrect Password" });
     }
-    const token = signToken(user.id);
+    const token = signToken(user.id, user.username, user.email);
     return res.status(StatusCodes.OK).json({
       token,
       user: { id: user.id, name: user.name, email: user.email },
