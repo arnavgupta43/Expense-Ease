@@ -1,8 +1,10 @@
 import express from "express";
 import userRoutes from "./routes/user.routes";
 import router from "./routes/auth.route";
+import friendRouter from "./routes/friend.route";
 const app = express();
 app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/auth", router);
+app.use("friend", friendRouter);
 export default app;
