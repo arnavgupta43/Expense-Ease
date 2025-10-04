@@ -1,10 +1,10 @@
 import { Router } from "express";
 import prisma from "../config/db"; //import the prisma client instance
+import { authMiddleware } from "../middlewares/auth.middleware";
+import { searchUser } from "../controllers/user.controller";
 const router = Router();
 
-// Route to get all users
-router.get("/", async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
-});
+//Search user for friend Request
+router.route("/search").get(authMiddleware, searchUser);
+
 export default router;
