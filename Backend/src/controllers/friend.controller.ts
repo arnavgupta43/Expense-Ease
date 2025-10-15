@@ -53,3 +53,62 @@ export const sentRequest = async (req: Request, res: Response) => {
       .json({ error: error?.message });
   }
 };
+
+// function to accept friend request
+export const acceptFriendRequest = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    //adding a check for userId to be a number for typescript checking
+    if (typeof userId !== "number") {
+      return res.status(400).json({ error: "Invalid senderId" });
+    }
+    const requesterId = parseInt(req.params.requesterId);
+    if (!requesterId || isNaN(requesterId)) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ msg: "Invalid request" });
+    }
+    // we cannot send the request to ourselves
+    if (requesterId == userId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ msg: "Invalid request" });
+    }
+    //search if the friendrequest exits in the database
+    const request = await prisma.friend.findUnique({
+      where: {
+        senderId_receiverId: {
+          receiverId: userId,
+          senderId: requesterId,
+        },
+      },
+    });
+    if (!request) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ msg: "Request does not exists" });
+    }
+    if (request.status === "ACCEPTED") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ msg: "Request already accepted" });
+    }
+
+    await prisma.friend.update({
+      where: {
+        senderId_receiverId: {
+          receiverId: userId,
+          senderId: requesterId,
+        },
+      },
+      data: {
+        status: "ACCEPTED",
+      },
+    });
+    return res.status(StatusCodes.OK).json({ msg: "Friend Added" });
+  } catch (error: any) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: error?.message });
+  }
+};
