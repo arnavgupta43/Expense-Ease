@@ -6,5 +6,5 @@ const app = express();
 app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/auth", router);
-app.use("friend", friendRouter);
+app.use("/friend", friendRouter);
 export default app;
