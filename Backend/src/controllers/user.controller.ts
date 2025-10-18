@@ -1,15 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import prisma from "../config/db";
 import { StatusCodes } from "http-status-codes";
-
+import { sendResponse } from "../utils/response";
 export const searchUser = async (req: Request, res: Response) => {
   try {
     const searchTerm = req.query.username as string;
     const currentUserId = req.user?.id;
     if (!searchTerm || searchTerm.length < 3) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ msg: "Search is too short" });
+      return sendResponse(res, {
+        success: false,
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: "Search is too short",
+      });
     }
     //search for the users with the given string
     const matchedUsers = await prisma.user.findMany({
@@ -53,10 +55,18 @@ export const searchUser = async (req: Request, res: Response) => {
       ...received.map((f) => f.senderId),
     ]);
     const filteredUser = matchedUsers.filter((user) => !excludeId.has(user.id));
-    return res.status(StatusCodes.OK).json({ users: filteredUser });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: {
+        users: filteredUser,
+      },
+    });
   } catch (error: any) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ error: error?.message });
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: error?.message,
+    });
   }
 };
