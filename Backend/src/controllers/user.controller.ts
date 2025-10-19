@@ -35,6 +35,9 @@ export const searchUser = async (req: Request, res: Response) => {
     const send = await prisma.friend.findMany({
       where: {
         senderId: currentUserId,
+        status: {
+          not: "BLOCKED",
+        },
       },
       select: {
         receiverId: true,
@@ -44,6 +47,9 @@ export const searchUser = async (req: Request, res: Response) => {
     const received = await prisma.friend.findMany({
       where: {
         receiverId: currentUserId,
+        status: {
+          not: "BLOCKED",
+        },
       },
       select: {
         senderId: true,
