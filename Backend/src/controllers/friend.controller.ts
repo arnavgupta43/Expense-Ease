@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import prisma from "../config/db";
 import { sendResponse } from "../utils/response";
+import { start } from "repl";
 export const sentRequest = async (req: Request, res: Response) => {
   try {
     const senderId = req.user?.id;
@@ -188,6 +189,168 @@ export const allPendingRequests = async (req: Request, res: Response) => {
       success: false,
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       error: "Failed to load request",
+    });
+  }
+};
+
+//contoller to reject the friend request the user will be blocked
+export const blockFriendRequest = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid SenderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    const senderId = req.body.senderId;
+    const request = await prisma.friend.findUnique({
+      where: {
+        senderId_receiverId: {
+          receiverId: userId,
+          senderId: senderId,
+        },
+      },
+    });
+    if (!request) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: StatusCodes.NOT_FOUND,
+        error: "Request Not Found",
+      });
+    }
+    const updateRequest = await prisma.friend.update({
+      where: {
+        senderId_receiverId: {
+          receiverId: userId,
+          senderId: senderId,
+        },
+      },
+      data: {
+        status: "BLOCKED",
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "User Blocked",
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: "Failed to load request",
+    });
+  }
+};
+
+// reject the friend request but not block the user
+export const rejectFriendRequest = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid SenderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    const senderId = req.body.senderId;
+    const request = await prisma.friend.findUnique({
+      where: {
+        senderId_receiverId: {
+          receiverId: userId,
+          senderId: senderId,
+        },
+      },
+    });
+    if (!request) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: StatusCodes.NOT_FOUND,
+        error: "Request Not Found",
+      });
+    }
+    // delete the request from the table
+    const deleteRequest = await prisma.friend.delete({
+      where: {
+        senderId_receiverId: {
+          senderId: senderId,
+          receiverId: userId,
+        },
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Request Rejected",
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: "Failed to load request",
+    });
+  }
+};
+
+// contoller to see all the friends of a user
+export const allFriends = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid SenderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    //extract the rows of the friends
+    const relations = await prisma.friend.findMany({
+      where: {
+        OR: [
+          { senderId: userId, status: "ACCEPTED" },
+          { receiverId: userId, status: "ACCEPTED" },
+        ],
+      },
+    });
+    // reduce only the other ids other than user
+    const friendIds = relations.map((relation) => {
+      return relation.senderId == userId
+        ? relation.receiverId
+        : relation.senderId;
+    });
+    if (friendIds.length === 0) {
+      return sendResponse(res, {
+        success: true,
+        data: [],
+        statusCode: StatusCodes.OK,
+      });
+    }
+    //now find the user with the ids reduced
+    const friends = await prisma.user.findMany({
+      where: {
+        id: {
+          in: friendIds,
+        },
+      },
+      select: {
+        username: true,
+        name: true,
+        id: true,
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      data: friends,
+      statusCode: StatusCodes.OK,
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      error: error?.message,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
     });
   }
 };
