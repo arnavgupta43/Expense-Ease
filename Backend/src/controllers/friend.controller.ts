@@ -148,3 +148,46 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
     });
   }
 };
+
+// function to fetch all the current friend request
+// added pagination for more pending request
+export const allPendingRequests = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) ?? 10;
+    const skip = (page - 1) * limit;
+
+    //adding a check for userId to be a number for typescript checking
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid SenderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    //check the databse for the requests
+    const pendingRequests = await prisma.friend.findMany({
+      where: {
+        receiverId: userId,
+        status: "PENDING",
+      },
+      skip,
+      take: limit,
+    });
+    return sendResponse(res, {
+      success: true,
+      data: {
+        pendingRequests,
+        pagination: { page, limit },
+      },
+      statusCode: StatusCodes.OK,
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: "Failed to load request",
+    });
+  }
+};
