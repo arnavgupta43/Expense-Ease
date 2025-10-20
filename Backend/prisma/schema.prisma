@@ -18,6 +18,7 @@ model User{
     email String @unique
     password String 
     createdAt DateTime @default(now())
+    personalExpenses PersonalExpense[]
     sentFriendRequests Friend[] @relation("sentRequests")
     receiveFriendRequests Friend[] @relation("receivedRequests")
     billsCreated Bill[] @relation("createdBy")
@@ -61,4 +62,30 @@ model BillParticipant{
     user User @relation(fields: [userId],references: [id])
     bill Bill @relation("billParticipants",fields: [billId],references: [id])
     @@unique([userId,billId])
+}
+//schema for personal epxenses 
+
+model PersonalExpense {
+  id          Int       @id @default(autoincrement())
+  title       String
+  amount      Float
+  category    ExpenseCategory
+  note        String
+  date        DateTime  @default(now())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+enum ExpenseCategory {
+  FOOD
+  TRAVEL
+  GROCERY
+  SHOPPING
+  RENT
+  UTILITIES
+  HEALTH
+  ENTERTAINMENT
+  EDUCATION
+  SUBSCRIPTION
+  OTHERS
 }
