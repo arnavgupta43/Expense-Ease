@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import prisma from "../config/db";
 import { sendResponse } from "../utils/response";
-import { start } from "repl";
 export const sentRequest = async (req: Request, res: Response) => {
   try {
     const senderId = req.user?.id;
