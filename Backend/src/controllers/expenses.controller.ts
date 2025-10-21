@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { sendResponse } from "../utils/response";
 import prisma from "../config/db";
+import { ExpenseCategory } from "@prisma/client";
 
 export const createExpense = async (req: Request, res: Response) => {
   try {
@@ -167,7 +168,7 @@ export const getAllExpense = async (req: Request, res: Response) => {
       skip,
       take: limit,
       orderBy: {
-        date: "asc",
+        date: "desc", //sort by most recent
       },
     });
     if (allExpenses.length == 0) {
@@ -196,9 +197,12 @@ export const getAllExpense = async (req: Request, res: Response) => {
 };
 
 //conttoller to get expense by catregory with pagination witht the newest expense first
-export const expensBycategory = async (req: Request, res: Response) => {
+export const expenseBycategory = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) ?? 10;
+    const skip = (page - 1) * limit;
     if (typeof userId !== "number") {
       return sendResponse(res, {
         success: false,
@@ -206,6 +210,24 @@ export const expensBycategory = async (req: Request, res: Response) => {
         statusCode: StatusCodes.BAD_REQUEST,
       });
     }
+    const categoryExpense = await prisma.personalExpense.findMany({
+      where: {
+        userId,
+        category: {
+          equals: req.query.category as ExpenseCategory,
+        },
+      },
+      skip,
+      take: limit,
+      orderBy: {
+        date: "desc",
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: categoryExpense,
+    });
   } catch (error: any) {
     return sendResponse(res, {
       success: false,
