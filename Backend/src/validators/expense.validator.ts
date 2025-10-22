@@ -7,7 +7,11 @@ export const createExpnese = {
       "number.base": "Amount should be a number",
       "any.required": "Amount is reqired",
     }),
-    title: Joi.string()
+    title: Joi.string().required().min(4).messages({
+      "string.min": "Title should be of min length 4",
+      "any.required": "Title is required",
+    }),
+    category: Joi.string()
       .valid(
         "FOOD",
         "TRAVEL",
@@ -28,13 +32,9 @@ export const createExpnese = {
         "string.min": "Title should be of min length 4",
         "any.required": "Title is required",
       }),
-    category: Joi.string().required().min(4).messages({
-      "string.min": "Title should be of min length 4",
-      "any.required": "Title is required",
-    }),
     note: Joi.string().required().min(4).messages({
       "string.min": "Title should be of min length 4",
-      "any.required": "Title is required",
+      "any.required": "Note is required",
     }),
     date: Joi.date().default(() => new Date()),
   }),
