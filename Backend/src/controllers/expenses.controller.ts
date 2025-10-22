@@ -48,7 +48,8 @@ export const createExpense = async (req: Request, res: Response) => {
 // delete the expenses find and then delete
 export const deleteExpense = async (req: Request, res: Response) => {
   try {
-    const { expenseid } = req.body;
+    const { id } = req.params;
+    const expenseid = parseInt(id);
     const userId = req.user?.id;
     if (typeof userId !== "number" || typeof expenseid !== "number") {
       return sendResponse(res, {
@@ -151,7 +152,7 @@ export const getAllExpense = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) ?? 10;
+    const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
     if (typeof userId !== "number") {

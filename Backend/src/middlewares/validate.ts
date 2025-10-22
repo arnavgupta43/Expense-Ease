@@ -6,7 +6,7 @@ type validationSchema = {
   query?: Joi.ObjectSchema;
   params?: Joi.ObjectSchema;
 };
-// new joi validation so we can check all body,query and params 
+// new joi validation so we can check all body,query and params
 export const validate = (schemas: validationSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const validationTargets: (keyof validationSchema)[] = [
@@ -18,7 +18,7 @@ export const validate = (schemas: validationSchema) => {
       const schema = schemas[key];
       if (schema) {
         const { error, value } = schema.validate(req[key], {
-          abortEarly: false,
+          abortEarly: true,
           stripUnknown: true,
         });
         if (error) {

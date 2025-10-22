@@ -16,7 +16,7 @@ router
   .post(authMiddleware, validate(createExpnese), createExpense);
 router.route("/expnenseBycategory").get(authMiddleware, expenseBycategory);
 router.route("/").get(authMiddleware, getAllExpense);
-router.route("/deleteExpense").delete(authMiddleware, deleteExpense);
+router.route("/deleteExpense/:id").delete(authMiddleware, deleteExpense);
 router.route("/updateExpense").patch(authMiddleware, upadteExpense);
 
 export default router;
