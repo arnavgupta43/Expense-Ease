@@ -68,7 +68,7 @@ export const deleteExpense = async (req: Request, res: Response) => {
     if (!expense) {
       return sendResponse(res, {
         success: false,
-        statusCode: StatusCodes.NOT_IMPLEMENTED,
+        statusCode: StatusCodes.NOT_FOUND,
         error: "Expense not Found",
       });
     }
@@ -116,7 +116,7 @@ export const upadteExpense = async (req: Request, res: Response) => {
     if (!expense) {
       return sendResponse(res, {
         success: false,
-        statusCode: StatusCodes.NOT_IMPLEMENTED,
+        statusCode: StatusCodes.NOT_FOUND,
         error: "Expense not Found",
       });
     }
