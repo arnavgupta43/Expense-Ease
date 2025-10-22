@@ -98,6 +98,8 @@ export const upadteExpense = async (req: Request, res: Response) => {
     const { expenseid, amount, title, category, date, note } = req.body;
     const userId = req.user?.id;
     if (typeof userId !== "number" || typeof expenseid !== "number") {
+      console.log(userId);
+      console.log(expenseid);
       return sendResponse(res, {
         success: false,
         error: "Invalid Request",
@@ -120,11 +122,18 @@ export const upadteExpense = async (req: Request, res: Response) => {
     }
     const updateData: Record<string, any> = {};
     if (amount !== undefined) updateData.amount = amount;
-    if (amount !== undefined) updateData.amount = amount;
     if (title !== undefined) updateData.title = title;
     if (category !== undefined) updateData.category = category;
     if (date !== undefined) updateData.date = new Date(date);
     if (note !== undefined) updateData.note = note;
+    const dataLength = Object.keys(updateData).length;
+    if (dataLength <= 1) {
+      return sendResponse(res, {
+        statusCode: StatusCodes.BAD_REQUEST,
+        success: false,
+        error: "Not enough data to update",
+      });
+    }
     //create a dynamic object for the upadte query
     const updatedExpense = await prisma.personalExpense.update({
       where: {
@@ -135,7 +144,7 @@ export const upadteExpense = async (req: Request, res: Response) => {
     return sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      data: updateData,
+      data: updatedExpense,
       message: "Expense updated",
     });
   } catch (error: any) {
@@ -202,7 +211,7 @@ export const expenseBycategory = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) ?? 10;
+    const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     if (typeof userId !== "number") {
       return sendResponse(res, {
