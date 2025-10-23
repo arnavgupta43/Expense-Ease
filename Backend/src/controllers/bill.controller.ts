@@ -2,9 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import prisma from "../config/db";
 import { sendResponse } from "../utils/response";
-import { error } from "console";
 
-//TO craete Bill -> check if the ids are valid -> There should not be any duplicate values-> They should be friends and not blocked
+//TO create Bill -> check if the ids are valid -> There should not be any duplicate values-> They should be friends and not blocked
 // -> create the actual bill
 
 export const createBill = async (req: Request, res: Response) => {
@@ -122,6 +121,201 @@ export const createBill = async (req: Request, res: Response) => {
       success: true,
       statusCode: StatusCodes.CREATED,
       data: bill,
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: error?.message,
+    });
+  }
+};
+
+//controller to get bills created by the user
+export const getBillCreate = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid senderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    const allBills = await prisma.bill.findMany({
+      where: {
+        createdById: userId,
+      },
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    if (allBills.length === 0) {
+      return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "No bills created",
+      });
+    }
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: allBills,
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: error?.message,
+    });
+  }
+};
+
+//controller to get bills user->as participants
+export const getBills = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid senderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    const billsParticipated = await prisma.billParticipant.findMany({
+      where: {
+        userId,
+        isSettled: false, //  unsettled bills
+      },
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    if (billsParticipated.length === 0) {
+      return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "No bills found",
+      });
+    }
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: billsParticipated,
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: error?.message,
+    });
+  }
+};
+
+//controller to settle the bill
+export const settleBill = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    const billId = parseInt(id);
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid senderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    //check if the bill id exits
+    const findBill = await prisma.billParticipant.findUnique({
+      where: {
+        userId_billId: {
+          userId,
+          billId,
+        },
+      },
+    });
+    if (!findBill) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: StatusCodes.NOT_FOUND,
+        error: "Bill not found",
+      });
+    }
+    //if bill exits settle the bill
+    const settleBill = await prisma.billParticipant.update({
+      where: {
+        userId_billId: {
+          userId,
+          billId,
+        },
+      },
+      data: {
+        isSettled: true,
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: settleBill,
+      message: "Bill Settled",
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: error?.message,
+    });
+  }
+};
+
+//controller to delete the bill
+export const deleteBill = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    const billId = parseInt(id);
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid senderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    //check if the bill exists and the onwership
+    const findBill = await prisma.bill.findUnique({
+      where: {
+        createdById: userId,
+        id: billId,
+      },
+    });
+    if (!findBill) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: StatusCodes.NOT_FOUND,
+        error: "Bill not found",
+      });
+    }
+    //now delete the bill
+    const deleteBill = await prisma.bill.delete({
+      where: {
+        createdById: userId,
+        id: billId,
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Bill deleted",
     });
   } catch (error: any) {
     return sendResponse(res, {
