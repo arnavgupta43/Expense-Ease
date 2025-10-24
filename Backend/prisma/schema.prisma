@@ -60,7 +60,7 @@ model BillParticipant{
     amountOwed Float
     isSettled Boolean @default(false)
     user User @relation(fields: [userId],references: [id])
-    bill Bill @relation("billParticipants",fields: [billId],references: [id])
+    bill Bill @relation("billParticipants",fields: [billId],references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     @@unique([userId,billId])
 }
