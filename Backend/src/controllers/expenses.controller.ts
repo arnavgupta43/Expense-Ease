@@ -93,7 +93,7 @@ export const deleteExpense = async (req: Request, res: Response) => {
 };
 
 //controller for updating a expense
-export const upadteExpense = async (req: Request, res: Response) => {
+export const updateExpense = async (req: Request, res: Response) => {
   try {
     const { expenseid, amount, title, category, date, note } = req.body;
     const userId = req.user?.id;
