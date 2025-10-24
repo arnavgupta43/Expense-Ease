@@ -381,3 +381,53 @@ export const totalUnsettledAmount = async (req: Request, res: Response) => {
     });
   }
 };
+
+//controller to view the details of a single bill
+export const viewBill = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    const billId = parseInt(id);
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid senderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    //first find iof the bill exits and check ownership then only go forward
+    const bill = await prisma.bill.findFirst({
+      where: {
+        id: billId,
+        createdById: userId,
+      },
+    });
+    if (!bill) {
+      return sendResponse(res, {
+        success: false,
+        error: "Bill Invalid",
+        statusCode: StatusCodes.NOT_FOUND,
+      });
+    }
+    // now find the details of the bils with the participants
+    const billDetails = await prisma.billParticipant.findMany({
+      where: {
+        billId,
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: {
+        bill,
+        details: billDetails,
+      },
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: error?.message,
+    });
+  }
+};
