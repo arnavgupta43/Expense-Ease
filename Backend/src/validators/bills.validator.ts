@@ -6,25 +6,25 @@ export const validatecreateBill = {
       "string.min": "Title should be of length 5",
       "any.required": "Title is required",
     }),
+    totalAmount: Joi.number().required().positive().messages({
+      "any.required": "Amountis required",
+      "number.base": "Amount should be a number",
+    }),
+    participants: Joi.array()
+      .items(
+        Joi.object({
+          userId: Joi.number().required().positive().integer().messages({
+            "base.number": "userId should be a number",
+          }),
+          amountOwed: Joi.number()
+            .positive()
+            .required()
+            .integer()
+            .messages({ "number.base": "Amount must be a number" }),
+        })
+      )
+      .unique("userId"),
   }),
-  totalAmount: Joi.number().required().positive().messages({
-    "any.required": "Amountis required",
-    "number.base": "Amount should be a number",
-  }),
-  participants: Joi.array()
-    .items(
-      Joi.object({
-        userId: Joi.number().required().positive().integer().messages({
-          "base.number": "userId should be a number",
-        }),
-        amountOwed: Joi.number()
-          .positive()
-          .required()
-          .integer()
-          .messages({ "number.base": "Amount must be a number" }),
-      })
-    )
-    .unique("userId"),
 };
 
 export const upadteDeleteBill = {

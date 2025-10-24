@@ -11,6 +11,6 @@ app.use("/users", userRoutes);
 app.use("/auth", router);
 app.use("/friend", friendRouter);
 app.use("/u/expense", expenseRouter);
-app.use("u/bills", billrouter);
+app.use("/u/bills", billrouter);
 app.use(notFoundRoute);
 export default app;

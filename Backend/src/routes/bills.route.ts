@@ -22,7 +22,7 @@ router
   .route("/deleteBill/:id")
   .delete(authMiddleware, validate(upadteDeleteBill), deleteBill);
 router.route("/getbills").get(authMiddleware, getBills);
-router.route("/getcreatedills").get(authMiddleware, getBillCreate);
+router.route("/getcreatedBills").get(authMiddleware, getBillCreate);
 router
   .route("/settleBill/:id")
   .post(authMiddleware, validate(upadteDeleteBill), settleBill);
