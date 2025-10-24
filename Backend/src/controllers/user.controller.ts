@@ -6,6 +6,9 @@ export const searchUser = async (req: Request, res: Response) => {
   try {
     const searchTerm = req.query.username as string;
     const currentUserId = req.user?.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
     if (!searchTerm || searchTerm.length < 3) {
       return sendResponse(res, {
         success: false,
@@ -24,6 +27,8 @@ export const searchUser = async (req: Request, res: Response) => {
           id: currentUserId,
         },
       },
+      skip,
+      take: limit,
       select: {
         id: true,
         username: true,
