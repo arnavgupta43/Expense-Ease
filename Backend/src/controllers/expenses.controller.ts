@@ -246,3 +246,60 @@ export const expenseBycategory = async (req: Request, res: Response) => {
     });
   }
 };
+
+//get the totalExpense for  the particular month
+export const monthExpense = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { month } = req.query;
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid UserId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    const now = new Date();
+    const targetMonth = month
+      ? new Date(`${month}-01`)
+      : new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const startOfMonth = new Date(
+      targetMonth.getFullYear(),
+      targetMonth.getMonth(),
+      1
+    );
+    const endOfMonth = new Date(
+      targetMonth.getFullYear(),
+      targetMonth.getMonth() + 1,
+      0,
+      23,
+      59,
+      59
+    );
+
+    //get expense on the current month
+    const currentExpense = await prisma.personalExpense.aggregate({
+      _sum: {
+        amount: true,
+      },
+      where: {
+        date: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: currentExpense,
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: error?.message,
+    });
+  }
+};

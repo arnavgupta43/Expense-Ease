@@ -6,6 +6,7 @@ import {
   expenseBycategory,
   getAllExpense,
   updateExpense,
+  monthExpense,
 } from "../controllers/expenses.controller";
 import {
   createExpnese,
@@ -26,5 +27,5 @@ router.route("/deleteExpense/:id").delete(authMiddleware, deleteExpense);
 router
   .route("/updateExpense")
   .patch(authMiddleware, validate(updateValidator), updateExpense);
-
+router.route("/monthExpense").get(authMiddleware, monthExpense);
 export default router;
