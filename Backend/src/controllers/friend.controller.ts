@@ -353,3 +353,37 @@ export const allFriends = async (req: Request, res: Response) => {
     });
   }
 };
+// controller for the count of pending friend request
+export const countPendingRequest = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid SenderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    const requests = await prisma.friend.aggregate({
+      _count: {
+        id: true,
+      },
+      where: {
+        senderId: userId,
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: {
+        requests: requests._count.id,
+      },
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      error: error?.message,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
