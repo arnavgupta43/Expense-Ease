@@ -14,16 +14,14 @@ export const validatecreateBill = {
   participants: Joi.array()
     .items(
       Joi.object({
-        userId: Joi.number()
-          .required()
-          .positive()
-          .integer()
-          .message("UserId should be valid"),
+        userId: Joi.number().required().positive().integer().messages({
+          "base.number": "userId should be a number",
+        }),
         amountOwed: Joi.number()
           .positive()
           .required()
           .integer()
-          .message("Amount should be correct"),
+          .messages({ "number.base": "Amount must be a number" }),
       })
     )
     .unique("userId"),
@@ -31,6 +29,9 @@ export const validatecreateBill = {
 
 export const upadteDeleteBill = {
   params: Joi.object({
-    id: Joi.number().positive().required().message("Valid Bill id is required"),
+    id: Joi.number()
+      .positive()
+      .required()
+      .messages({ "number.base": "BillId must be a number" }),
   }),
 };
