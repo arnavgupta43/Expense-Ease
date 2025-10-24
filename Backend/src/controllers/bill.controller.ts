@@ -325,3 +325,59 @@ export const deleteBill = async (req: Request, res: Response) => {
     });
   }
 };
+
+//controller for the total unsettled amount of the bills
+export const totalUnsettledAmount = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (typeof userId !== "number") {
+      return sendResponse(res, {
+        success: false,
+        error: "Invalid senderId",
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    //fisrt find all the bills created by the user and get all the ids
+    const allBillsCreated = await prisma.bill.findMany({
+      where: {
+        createdById: userId,
+      },
+      select: {
+        id: true,
+      },
+    });
+    //once we get all the ids if no bills return response
+    if (allBillsCreated.length === 0) {
+      return sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "No bills Found",
+      });
+    }
+    const billIds = allBillsCreated.map((p) => p.id);
+    const unsettledAmount = await prisma.billParticipant.aggregate({
+      _sum: {
+        amountOwed: true,
+      },
+      where: {
+        billId: {
+          in: billIds,
+        },
+        isSettled: false,
+      },
+    });
+    return sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: {
+        totalUnsettledAmount: unsettledAmount._sum.amountOwed ?? 0,
+      },
+    });
+  } catch (error: any) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error: error?.message,
+    });
+  }
+};

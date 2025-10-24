@@ -6,6 +6,7 @@ import {
   getBillCreate,
   getBills,
   settleBill,
+  totalUnsettledAmount,
 } from "../controllers/bill.controller";
 import { validate } from "../middlewares/validate";
 import {
@@ -26,4 +27,5 @@ router.route("/getcreatedBills").get(authMiddleware, getBillCreate);
 router
   .route("/settleBill/:id")
   .post(authMiddleware, validate(upadteDeleteBill), settleBill);
+router.route("/totalUnsettledAmount").get(authMiddleware, totalUnsettledAmount);
 export default router;
