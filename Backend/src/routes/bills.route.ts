@@ -27,7 +27,7 @@ router.route("/getbills").get(authMiddleware, getBills);
 router.route("/getcreatedBills").get(authMiddleware, getBillCreate);
 router
   .route("/settleBill/:id")
-  .post(authMiddleware, validate(upadteDeleteBill), settleBill);
+  .patch(authMiddleware, validate(upadteDeleteBill), settleBill);
 router.route("/totalUnsettledAmount").get(authMiddleware, totalUnsettledAmount);
 router.route("/viewBill/:id").get(authMiddleware, viewBill);
 export default router;
