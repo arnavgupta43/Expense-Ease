@@ -7,6 +7,8 @@ import friendRouter from "./routes/friend.route";
 import expenseRouter from "./routes/expense.route";
 import billrouter from "./routes/bills.route";
 import { notFoundRoute } from "./controllers/notFoundController";
+import morganMiddleware from "./config/morganMiddleware";
+import Logger from "./utils/logger";
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 100,
@@ -15,6 +17,7 @@ const app = express();
 app.use(cors());
 app.use(limiter);
 app.use(express.json());
+app.use(morganMiddleware);
 app.use("/users", userRoutes);
 app.use("/auth", router);
 app.use("/friend", friendRouter);
