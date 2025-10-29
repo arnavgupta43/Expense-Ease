@@ -10,7 +10,6 @@ import {
 } from "../controllers/expenses.controller";
 import {
   createExpnese,
-  getExpenseByCategory,
   updateValidator,
 } from "../validators/expense.validator";
 import { validate } from "../middlewares/validate";
@@ -19,9 +18,7 @@ const router = Router();
 router
   .route("/createExpense")
   .post(authMiddleware, validate(createExpnese), createExpense);
-router
-  .route("/expnenseBycategory")
-  .get(authMiddleware, validate(getExpenseByCategory), expenseBycategory);
+router.route("/expnenseBycategory").get(authMiddleware, expenseBycategory);
 router.route("/").get(authMiddleware, getAllExpense);
 router.route("/deleteExpense/:id").delete(authMiddleware, deleteExpense);
 router
