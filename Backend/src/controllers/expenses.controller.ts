@@ -284,6 +284,7 @@ export const monthExpense = async (req: Request, res: Response) => {
         amount: true,
       },
       where: {
+        userId,
         date: {
           gte: startOfMonth,
           lte: endOfMonth,
