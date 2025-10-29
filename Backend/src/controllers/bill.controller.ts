@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import prisma from "../config/db";
 import { sendResponse } from "../utils/response";
-
+import Logger from "../utils/logger";
 //TO create Bill -> check if the ids are valid -> There should not be any duplicate values-> They should be friends and not blocked
 // -> create the actual bill
 
@@ -10,6 +10,7 @@ export const createBill = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid senderId",
@@ -46,6 +47,7 @@ export const createBill = async (req: Request, res: Response) => {
     const participantsIds = participantList.map((p: any) => p.userId);
     const uniqueIds = new Set(participantsIds);
     if (uniqueIds.size !== participantsIds.length) {
+      Logger.error("Duplicate Participants ");
       return sendResponse(res, {
         success: false,
         statusCode: StatusCodes.BAD_REQUEST,
@@ -54,6 +56,7 @@ export const createBill = async (req: Request, res: Response) => {
     }
     //user cannot participat in the bill split
     if (participantsIds.includes(userId)) {
+      Logger.warn(`User ${userId} cannot participate`);
       return sendResponse(res, {
         success: false,
         statusCode: StatusCodes.BAD_REQUEST,
@@ -68,6 +71,7 @@ export const createBill = async (req: Request, res: Response) => {
       },
     });
     if (existingUsers.length !== participantsIds.length) {
+      Logger.error("Invalid Ids");
       return sendResponse(res, {
         statusCode: StatusCodes.BAD_REQUEST,
         success: false,
@@ -93,6 +97,7 @@ export const createBill = async (req: Request, res: Response) => {
       },
     });
     if (validFriends.length !== participantsIds.length) {
+      Logger.warn(`Some participants are not friends`);
       return sendResponse(res, {
         success: false,
         error: "Some participants are not your friends.",
@@ -117,6 +122,7 @@ export const createBill = async (req: Request, res: Response) => {
         participants: true,
       },
     });
+    Logger.info(`Bill with id ${bill.id} created`);
     return sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,
@@ -139,6 +145,7 @@ export const getBillCreate = async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid senderId",
@@ -156,6 +163,7 @@ export const getBillCreate = async (req: Request, res: Response) => {
       },
     });
     if (allBills.length === 0) {
+      Logger.warn(`No Bills created`);
       return sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -184,6 +192,7 @@ export const getBills = async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid senderId",
@@ -208,6 +217,7 @@ export const getBills = async (req: Request, res: Response) => {
         message: "No bills found",
       });
     }
+    Logger.info(`Bills fetched`);
     return sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -229,6 +239,7 @@ export const settleBill = async (req: Request, res: Response) => {
     const { id } = req.params;
     const billId = parseInt(id);
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid senderId",
@@ -245,6 +256,7 @@ export const settleBill = async (req: Request, res: Response) => {
       },
     });
     if (!findBill) {
+      Logger.warn(`BillId -${billId} not exists`);
       return sendResponse(res, {
         success: false,
         statusCode: StatusCodes.NOT_FOUND,
@@ -263,6 +275,7 @@ export const settleBill = async (req: Request, res: Response) => {
         isSettled: true,
       },
     });
+    Logger.info(`Billid- ${billId} settled`);
     return sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -285,6 +298,7 @@ export const deleteBill = async (req: Request, res: Response) => {
     const { id } = req.params;
     const billId = parseInt(id);
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid senderId",
@@ -299,6 +313,7 @@ export const deleteBill = async (req: Request, res: Response) => {
       },
     });
     if (!findBill) {
+      Logger.error(`BIllId- ${billId} does not exists`);
       return sendResponse(res, {
         success: false,
         statusCode: StatusCodes.NOT_FOUND,
@@ -331,6 +346,7 @@ export const totalUnsettledAmount = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid senderId",
@@ -348,6 +364,7 @@ export const totalUnsettledAmount = async (req: Request, res: Response) => {
     });
     //once we get all the ids if no bills return response
     if (allBillsCreated.length === 0) {
+      Logger.warn(`No bills created`);
       return sendResponse(res, {
         success: true,
         statusCode: StatusCodes.OK,
@@ -389,6 +406,7 @@ export const viewBill = async (req: Request, res: Response) => {
     const { id } = req.params;
     const billId = parseInt(id);
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid senderId",
@@ -403,6 +421,7 @@ export const viewBill = async (req: Request, res: Response) => {
       },
     });
     if (!bill) {
+      Logger.error(`BIll with ${billId} does not exist`);
       return sendResponse(res, {
         success: false,
         error: "Bill Invalid",
@@ -415,6 +434,7 @@ export const viewBill = async (req: Request, res: Response) => {
         billId,
       },
     });
+    Logger.info(`Bill details fetched- ${billId}`);
     return sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,

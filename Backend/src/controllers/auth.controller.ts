@@ -4,6 +4,7 @@ import { hashPassword, comparePassword } from "../utils/hash";
 import { signToken } from "../utils/jwt";
 import { StatusCodes } from "http-status-codes";
 import { sendResponse } from "../utils/response";
+import Logger from "../utils/logger";
 export const register = async (req: Request, res: Response) => {
   const { name, username, email, password } = req.body;
   try {
@@ -29,6 +30,9 @@ export const register = async (req: Request, res: Response) => {
       },
     });
     const token = signToken(user.id, user.username, user.email);
+    Logger.info(
+      `User successfully logged ${token}- ${user.username}- ${user.id} `
+    );
     return sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,
@@ -70,6 +74,7 @@ export const login = async (req: Request, res: Response) => {
       });
     }
     const token = signToken(user.id, user.username, user.email);
+    Logger.info(`User successfully logged- ${user.username}- ${user.id} `);
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
       success: true,

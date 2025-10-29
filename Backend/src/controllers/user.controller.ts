@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import prisma from "../config/db";
 import { StatusCodes } from "http-status-codes";
 import { sendResponse } from "../utils/response";
+import Logger from "../utils/logger";
 export const searchUser = async (req: Request, res: Response) => {
   try {
     const searchTerm = req.query.username as string;
@@ -10,6 +11,7 @@ export const searchUser = async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     if (!searchTerm || searchTerm.length < 3) {
+      Logger.warn(`Searh term is short`);
       return sendResponse(res, {
         success: false,
         statusCode: StatusCodes.BAD_REQUEST,

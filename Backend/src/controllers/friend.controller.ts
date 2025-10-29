@@ -2,11 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import prisma from "../config/db";
 import { sendResponse } from "../utils/response";
+import Logger from "../utils/logger";
 export const sentRequest = async (req: Request, res: Response) => {
   try {
     const senderId = req.user?.id;
     //adding a check for senderId to be a number for typescript checking
     if (typeof senderId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid senderId",
@@ -78,6 +80,7 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
     const userId = req.user?.id;
     //adding a check for userId to be a number for typescript checking
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid SenderId",
@@ -160,6 +163,7 @@ export const allPendingRequests = async (req: Request, res: Response) => {
 
     //adding a check for userId to be a number for typescript checking
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid SenderId",
@@ -197,6 +201,7 @@ export const blockFriendRequest = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid SenderId",
@@ -249,6 +254,7 @@ export const rejectFriendRequest = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid SenderId",
@@ -299,6 +305,7 @@ export const allFriends = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid SenderId",
@@ -358,6 +365,7 @@ export const countPendingRequest = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (typeof userId !== "number") {
+      Logger.error(`userId is invalid `);
       return sendResponse(res, {
         success: false,
         error: "Invalid SenderId",
