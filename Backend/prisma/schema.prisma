@@ -35,6 +35,8 @@ model Friend{
     sender User @relation("sentRequests", fields: [senderId],references: [id])
     receiver User @relation("receivedRequests",fields: [receiverId],references: [id])
     @@unique([senderId,receiverId])
+    @@index([senderId])
+    @@index([receiverId])
 }
 
 enum FriendshipStatus{
