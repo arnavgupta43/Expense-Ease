@@ -59,4 +59,21 @@ describe("createExpense", () => {
     expect(res._getStatusCode()).toBe(201);
     expect(JSON.parse(res._getData()).data).toEqual(fakeExpense);
   });
+  it("should handle DB errors", async () => {
+    const req = httpMocks.createRequest({
+      body: {
+        amount: 100,
+        note: "demo",
+        category: "OTHERS",
+        title: "Movie",
+        date: "2025-10-22",
+      },
+      user: { id: userId },
+    });
+    const res = httpMocks.createResponse();
+    prisma.personalExpense.create.mockRejectedValue(new Error("DB error"));
+    await createExpense(req, res);
+    expect(res._getStatusCode()).toBe(500);
+    expect(JSON.parse(res._getData()).error).toContain("DB error");
+  });
 });
