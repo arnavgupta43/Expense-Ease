@@ -76,7 +76,7 @@ model PersonalExpense {
   note        String
   date        DateTime  @default(now())
   userId      Int
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id],onDelete: Cascade)
   @@index([userId])
   @@index([date])
 }
