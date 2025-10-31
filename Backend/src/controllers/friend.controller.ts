@@ -31,6 +31,17 @@ export const sentRequest = async (req: Request, res: Response) => {
         error: "Cannot send request to yourself",
       });
     }
+    //check if the receiver exits
+    const receiver = await prisma.user.findFirst({
+      where: { id: receiverId },
+    });
+    if (!receiver) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: StatusCodes.NOT_FOUND,
+        message: "Receiver does not exits",
+      });
+    }
     const friend = await prisma.user.findFirst({ where: { id: receiverId } });
     //lets find the user are already friends
 
