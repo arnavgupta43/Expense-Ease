@@ -34,14 +34,14 @@ jobs:
           node-version: '20'
       - name: Install dependencies
         run: npm install
-        working-directory: /backend
+        working-directory: ./Backend
       - name: generate prisma client
         run: npx prisma generate
-        working-directory: /backend
+        working-directory: ./Backend
       - name: Push prisma schema to DB
         run: npx prisma db push
-        working-directory: /backend
+        working-directory: ./Backend
       - name: Run tests
         run: npm run test
-        working-directory: /backend
+        working-directory: ./Backend
       
