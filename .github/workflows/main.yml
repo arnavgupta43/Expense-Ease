@@ -2,13 +2,13 @@ name: CI - Test and Lint #name of the workflow
 
 on:
   push:
-    branch: [main] #run on every push to the main 
+    branches: [main] #run on every push to the main 
   pull_request:
-    branch: [main] #run on every pr to the main
+    branches: [main] #run on every pr to the main
 
 jobs:
   test:
-    run-on: ubuntu-latest #runs on ubuntu
+    runs-on: ubuntu-latest #runs on ubuntu
     services:
       postgres: #spin up a postgres image with all details
         image: postgres:15
