@@ -1,0 +1,43 @@
+name: CI - Test and Lint #name of the workflow
+
+on:
+  push:
+    branch: [main] #run on every push to the main 
+  pull_request:
+    branch: [main] #run on every pr to the main
+
+jobs:
+  test:
+    run-on: ubuntu-latest #runs on ubuntu
+    services:
+      postgres: #spin up a postgres image with all details
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        options: >-     #health check ensure it is ready before the tests
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Use Node.jobs
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: generate prisma client
+        run: npx prisma generate
+      - name: Push prisma schema to DB
+        run: npx prisma db push
+      - name: RUn tests
+        run: npm run test
+      
